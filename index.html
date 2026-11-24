@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="lingjian-release" content="1">
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="lingjian-release" content="2"><meta name="lingjian-feedback-endpoint" content=""><meta name="lingjian-feedback-form" content="https://lilac-fold-f53.notion.site/422e6b6e420e81bcade9d813ff821c24?pvs=105"><style>#playtest-feedback{max-width:min(36rem,calc(100vw - 3rem));width:100%;border:1px solid #b2c3ad;border-radius:.8rem;padding:1rem 1.2rem;background:#f9faef;color:#263c32}#playtest-feedback::backdrop{background:#25372977}#feedback-form{display:grid;gap:.65rem}#feedback-fields:not([hidden]){display:grid;gap:.65rem}#feedback-form-link:not([hidden]){display:inline-flex;align-items:center;padding:.4rem .7rem;background:#305235;color:#fff;border-radius:.35rem}#feedback-form h2,#feedback-form p{margin:0}#feedback-message{box-sizing:border-box;width:100%;font:inherit;padding:.6rem;resize:vertical}#feedback-status{min-height:1.2em;font-weight:650}.feedback-actions{display:flex;justify-content:flex-end;gap:.5rem}</style>
 <style>
 #playtest-update:not([hidden]){display:inline-flex;align-items:center;gap:.3em;font-size:.8rem;font-weight:650;white-space:nowrap;color:#305235;background:#e1efd5;border:1px solid #b8cea9;border-radius:999px;padding:.15em .48em}
 #playtest-update i{height:.5em;width:.5em;border-radius:50%;background:currentColor;animation:playtest-update-dot 1.65s ease-in-out infinite}
@@ -8,7 +8,7 @@
 </style><meta name="viewport" content="width=device-width,initial-scale=1"><title>岭间 · 平地自由建造</title><link rel="icon" href="data:,"><script>if(location.search)history.replaceState(null,"",location.pathname+location.hash)</script><link rel="stylesheet" href="style.css?v=parcel-gates-2"></head>
 <body>
 <header><div class="brand"><span class="logo" aria-hidden="true">川</span><strong>岭间</strong><span class="divider"></span><span class="subtitle">道路与桥梁沙盘</span></div>
-<div class="sim"><span id="candidate-tools" hidden><button id="candidate-settings" type="button">候选存档</button> <small id="candidate-status"></small></span><button id="cancelRampWork" type="button" hidden title="撤回本次等待中的匝道改造，恢复入口通行">匝道清空中 · 取消</button><button id="keepMap" type="button">保存地图</button><span id="playtest-update" role="status" title="请先保存地图，再刷新此页载入新版本" hidden><i aria-hidden="true"></i>可更新</span><span id="running"><i></i>车流运行中</span><button id="pause" title="暂停或继续模拟（空格）">暂停</button><button id="speed" title="切换模拟速度">1×</button></div></header>
+<div class="sim"><span id="candidate-tools" hidden><button id="candidate-settings" type="button">候选存档</button> <small id="candidate-status"></small></span><button id="cancelRampWork" type="button" hidden title="撤回本次等待中的匝道改造，恢复入口通行">匝道清空中 · 取消</button><button id="keepMap" type="button">保存地图</button><button id="feedback-open" type="button">反馈</button><span id="playtest-update" role="status" title="请先保存地图，再刷新此页载入新版本" hidden><i aria-hidden="true"></i>可更新</span><span id="running"><i></i>车流运行中</span><button id="pause" title="暂停或继续模拟（空格）">暂停</button><button id="speed" title="切换模拟速度">1×</button></div></header>
 <main><aside>
 <div class="mapname"><span class="mapicon" aria-hidden="true">⌁</span><div><small>当前地图</small><h1>平原</h1></div></div>
 <section id="mapExpansion" hidden><h2>跨区架路试验</h2><output id="mapExtent"></output><button id="expandEast" type="button">向东展开一块</button></section>
@@ -353,4 +353,110 @@ $('keepMap').onclick=async()=>{
   document.addEventListener('visibilitychange',check);
   check();
 })();
-</script></body></html>
+</script><dialog id="playtest-feedback" aria-labelledby="feedback-heading">
+  <form id="feedback-form">
+    <h2 id="feedback-heading">给《岭间》提反馈</h2>
+    <div id="feedback-fields">
+    <p>可以描述你遇到的问题，也可以带上一张截图。请不要上传账号、联系方式等个人信息。</p>
+    <label for="feedback-message">反馈内容</label>
+    <textarea id="feedback-message" maxlength="2000" rows="5" placeholder="例如：我在哪里操作、点了什么、实际发生了什么" required autofocus></textarea>
+    <label for="feedback-screenshot">截图（可选）</label>
+    <input id="feedback-screenshot" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="feedback-file-help">
+    <small id="feedback-file-help">PNG、JPG 或 WebP，最多 5 MB。</small>
+    <p id="feedback-status" role="status"></p>
+    </div>
+    <p id="feedback-form-note" hidden>在新标签页打开 Notion 反馈表。请在表里填写后提交；这个游戏页不会自动发送任何文字或截图。</p>
+    <div class="feedback-actions">
+      <button id="feedback-close" type="button">关闭</button>
+      <a id="feedback-form-link" target="_blank" rel="noopener noreferrer" hidden>打开反馈表</a>
+      <button id="feedback-submit" type="submit" disabled>发送反馈</button>
+    </div>
+  </form>
+</dialog>
+<script>
+(()=>{
+  const dialog=document.getElementById('playtest-feedback');
+  const form=document.getElementById('feedback-form');
+  const text=document.getElementById('feedback-message');
+  const file=document.getElementById('feedback-screenshot');
+  const send=document.getElementById('feedback-submit');
+  const status=document.getElementById('feedback-status');
+  const help=document.getElementById('feedback-file-help');
+  const link=document.getElementById('feedback-form-link');
+  const formRaw=document.querySelector('meta[name="lingjian-feedback-form"]').content.trim();
+  let external;
+  if(formRaw)try{
+    const url=new URL(formRaw);
+    if(url.protocol==='https:'&&!url.port&&!url.username&&!url.password&&!url.hash&&(!url.search||/^\?pvs=[0-9]+$/.test(url.search))&&
+      (url.hostname==='www.notion.so'||/^[a-z0-9][a-z0-9-]*\.notion\.site$/.test(url.hostname)))external=url;
+  }catch{}
+  if(external){
+    link.href=external.href;link.hidden=false;
+    document.getElementById('feedback-fields').hidden=true;
+    document.getElementById('feedback-form-note').hidden=false;
+    send.hidden=true;
+  }
+  const raw=document.querySelector('meta[name="lingjian-feedback-endpoint"]').content.trim();
+  let endpoint;
+  if(raw&&!external)try{
+    const url=new URL(raw,location.href);
+    if(!url.username&&!url.password&&!url.hash&&(url.protocol==='https:'||(url.protocol==='http:'&&url.origin===location.origin&&['127.0.0.1','localhost','[::1]'].includes(url.hostname))))endpoint=url;
+  }catch{}
+  const release=document.querySelector('meta[name="lingjian-release"]').content;
+  const types=['image/png','image/jpeg','image/webp'];
+  let sending=false,requestId=null;
+  const advice='PNG、JPG 或 WebP，最多 5 MB。';
+  function refresh(){
+    const selected=file.files[0];
+    const invalid=!!selected&&(!types.includes(selected.type)||selected.size<1||selected.size>5*1024*1024);
+    help.textContent=invalid?'截图无法上传。请选 PNG、JPG 或 WebP，且不超过 5 MB。':advice;
+    file.setAttribute('aria-invalid',String(invalid));
+    send.disabled=!endpoint||sending||!text.value.trim()||text.value.length>2000||invalid;
+  }
+  function changed(){
+    requestId=null;
+    if(endpoint&&!sending)status.textContent='';
+    refresh();
+  }
+  text.addEventListener('input',changed);
+  file.addEventListener('change',changed);
+  // The game itself listens at document level: do not let feedback keys edit the road draft.
+  dialog.addEventListener('keydown',event=>event.stopPropagation());
+  document.getElementById('feedback-open').onclick=()=>{
+    if(!endpoint&&!external)status.textContent='反馈服务尚未接通，暂不能发送。';
+    refresh();dialog.showModal();if(external)link.focus();
+  };
+  document.getElementById('feedback-close').onclick=()=>dialog.close();
+  form.addEventListener('submit',async event=>{
+    event.preventDefault();
+    refresh();
+    if(send.disabled)return;
+    const body=new FormData();
+    body.set('message',text.value.trim());
+    if(file.files[0])body.set('screenshot',file.files[0]);
+    body.set('release',release);
+    requestId??=crypto.randomUUID();
+    body.set('requestId',requestId);
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),35000);
+    sending=true;text.disabled=true;file.disabled=true;refresh();
+    form.setAttribute('aria-busy','true');
+    status.textContent='正在发送…';
+    try{
+      const response=await fetch(endpoint,{method:'POST',body,cache:'no-store',credentials:'omit',redirect:'error',signal:controller.signal});
+      if(!response.ok)throw Error();
+      const result=await response.json();
+      const receipt=result?.receipt;
+      if(result?.ok!==true||typeof receipt!=='string'||!receipt.trim()||receipt.length>120)throw Error();
+      form.reset();requestId=null;
+      status.textContent='反馈已发送。回执：'+receipt;
+    }catch{
+      status.textContent='发送未获确认，内容未清空。你可以再试一次。';
+    }finally{
+      clearTimeout(timeout);sending=false;text.disabled=false;file.disabled=false;
+      form.removeAttribute('aria-busy');refresh();
+    }
+  });
+})();
+</script>
+</body></html>

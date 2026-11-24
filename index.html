@@ -1,8 +1,14 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>岭间 · 平地自由建造</title><link rel="icon" href="data:,"><script>if(location.search)history.replaceState(null,"",location.pathname+location.hash)</script><link rel="stylesheet" href="style.css?v=parcel-gates-2"></head>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="lingjian-release" content="1">
+<style>
+#playtest-update:not([hidden]){display:inline-flex;align-items:center;gap:.3em;font-size:.8rem;font-weight:650;white-space:nowrap;color:#305235;background:#e1efd5;border:1px solid #b8cea9;border-radius:999px;padding:.15em .48em}
+#playtest-update i{height:.5em;width:.5em;border-radius:50%;background:currentColor;animation:playtest-update-dot 1.65s ease-in-out infinite}
+@keyframes playtest-update-dot{50%{opacity:.22}}
+@media(prefers-reduced-motion:reduce){#playtest-update i{animation:none}}
+</style><meta name="viewport" content="width=device-width,initial-scale=1"><title>岭间 · 平地自由建造</title><link rel="icon" href="data:,"><script>if(location.search)history.replaceState(null,"",location.pathname+location.hash)</script><link rel="stylesheet" href="style.css?v=parcel-gates-2"></head>
 <body>
 <header><div class="brand"><span class="logo" aria-hidden="true">川</span><strong>岭间</strong><span class="divider"></span><span class="subtitle">道路与桥梁沙盘</span></div>
-<div class="sim"><span id="candidate-tools" hidden><button id="candidate-settings" type="button">候选存档</button> <small id="candidate-status"></small></span><button id="cancelRampWork" type="button" hidden title="撤回本次等待中的匝道改造，恢复入口通行">匝道清空中 · 取消</button><button id="keepMap" type="button">保存地图</button><span id="running"><i></i>车流运行中</span><button id="pause" title="暂停或继续模拟（空格）">暂停</button><button id="speed" title="切换模拟速度">1×</button></div></header>
+<div class="sim"><span id="candidate-tools" hidden><button id="candidate-settings" type="button">候选存档</button> <small id="candidate-status"></small></span><button id="cancelRampWork" type="button" hidden title="撤回本次等待中的匝道改造，恢复入口通行">匝道清空中 · 取消</button><button id="keepMap" type="button">保存地图</button><span id="playtest-update" role="status" title="请先保存地图，再刷新此页载入新版本" hidden><i aria-hidden="true"></i>可更新</span><span id="running"><i></i>车流运行中</span><button id="pause" title="暂停或继续模拟（空格）">暂停</button><button id="speed" title="切换模拟速度">1×</button></div></header>
 <main><aside>
 <div class="mapname"><span class="mapicon" aria-hidden="true">⌁</span><div><small>当前地图</small><h1>平原</h1></div></div>
 <section id="mapExpansion" hidden><h2>跨区架路试验</h2><output id="mapExtent"></output><button id="expandEast" type="button">向东展开一块</button></section>
@@ -302,4 +308,49 @@ $('keepMap').onclick=async()=>{
   await save();
   if(!mapSaveConflict&&savedMapRaw===expected)flash('地图已保存，下次用这个浏览器打开即可继续');
 };
+</script><script>
+(()=>{
+  if(!['https:','http:'].includes(location.protocol))return;
+  const here=Number(document.querySelector('meta[name="lingjian-release"]').content);
+  const badge=document.getElementById('playtest-update');
+  const manifest=new URL('version.json',location.href);
+  const entry=new URL(location.pathname,location.origin);
+  let busy=false,lastCheck=0;
+  async function readEntryRelease(options){
+    const response=await fetch(entry,{...options,headers:{Range:'bytes=0-4095'}});
+    if(!response.ok||!response.body)return 0;
+    // If Range is ignored, stop reading once we know the release or reach the prefix limit.
+    const reader=response.body.getReader(),decoder=new TextDecoder();
+    let left=4096,head='';
+    try{
+      while(left>0){
+        const {done,value}=await reader.read();
+        if(done)break;
+        const bytes=value.subarray(0,left);
+        left-=bytes.length;head+=decoder.decode(bytes,{stream:true});
+        const match=/<meta name="lingjian-release" content="([1-9][0-9]*)">/.exec(head);
+        if(match)return Number(match[1]);
+      }
+      return 0;
+    }finally{reader.cancel().catch(()=>{});}
+  }
+  async function check(){
+    if(document.hidden||!badge.hidden||busy||Date.now()-lastCheck<5000)return;
+    busy=true;lastCheck=Date.now();
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),8000);
+    const options={cache:'no-store',mode:'same-origin',redirect:'error',signal:controller.signal};
+    try{
+      const response=await fetch(manifest,options);
+      if(!response.ok)return;
+      const next=(await response.json())?.release;
+      if(!Number.isSafeInteger(next)||next<=here)return;
+      if(await readEntryRelease(options)!==next)return;
+      badge.hidden=false;clearInterval(poll);
+    }catch{}finally{clearTimeout(timeout);busy=false;}
+  }
+  const poll=setInterval(check,60000);
+  document.addEventListener('visibilitychange',check);
+  check();
+})();
 </script></body></html>

@@ -1,0 +1,12 @@
+name: Public playtest verification
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  reopen-road:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --prefix "$RUNNER_TEMP/browser-check" --ignore-scripts --no-audit --no-fund playwright-core@1.55.0
+      - run: NODE_PATH="$RUNNER_TEMP/browser-check/node_modules" node .github/checks/road-save.cjs "https://z74vt6sg4f-byte.github.io/lingjian-playtest/"

@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="lingjian-release" content="4"><meta name="lingjian-feedback-endpoint" content=""><meta name="lingjian-feedback-form" content="https://lilac-fold-f53.notion.site/422e6b6e420e81bcade9d813ff821c24?pvs=105"><style>#playtest-feedback{max-width:min(36rem,calc(100vw - 3rem));width:100%;border:1px solid #b2c3ad;border-radius:.8rem;padding:1rem 1.2rem;background:#f9faef;color:#263c32}#playtest-feedback::backdrop{background:#25372977}#feedback-form{display:grid;gap:.65rem}#feedback-fields:not([hidden]){display:grid;gap:.65rem}#feedback-form-link:not([hidden]){display:inline-flex;align-items:center;padding:.4rem .7rem;background:#305235;color:#fff;border-radius:.35rem}#feedback-form h2,#feedback-form p{margin:0}#feedback-message{box-sizing:border-box;width:100%;font:inherit;padding:.6rem;resize:vertical}#feedback-status{min-height:1.2em;font-weight:650}.feedback-actions{display:flex;justify-content:flex-end;gap:.5rem}</style>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="lingjian-release" content="5"><meta name="lingjian-feedback-endpoint" content=""><meta name="lingjian-feedback-form" content="https://lilac-fold-f53.notion.site/422e6b6e420e81bcade9d813ff821c24?pvs=105"><style>#playtest-feedback{max-width:min(36rem,calc(100vw - 3rem));width:100%;border:1px solid #b2c3ad;border-radius:.8rem;padding:1rem 1.2rem;background:#f9faef;color:#263c32}#playtest-feedback::backdrop{background:#25372977}#feedback-form{display:grid;gap:.65rem}#feedback-fields:not([hidden]){display:grid;gap:.65rem}#feedback-form-link:not([hidden]){display:inline-flex;align-items:center;padding:.4rem .7rem;background:#305235;color:#fff;border-radius:.35rem}#feedback-form h2,#feedback-form p{margin:0}#feedback-message{box-sizing:border-box;width:100%;font:inherit;padding:.6rem;resize:vertical}#feedback-status{min-height:1.2em;font-weight:650}.feedback-actions{display:flex;justify-content:flex-end;gap:.5rem}</style>
 <style>
-#playtest-update:not([hidden]){display:inline-flex;align-items:center;gap:.3em;font-size:.8rem;font-weight:650;white-space:nowrap;color:#305235;background:#e1efd5;border:1px solid #b8cea9;border-radius:999px;padding:.15em .48em}
+.playtest-version{display:inline-flex;gap:.45em;align-items:center;white-space:nowrap;flex:none}#playtest-release{color:#e2efda;font-size:.8rem;font-variant-numeric:tabular-nums}@media(max-width:570px){body>header{height:auto;min-height:48px;padding-block:5px;gap:4px;flex-wrap:wrap}body>header .sim{gap:4px;flex-wrap:wrap}}#playtest-update:not([hidden]){display:inline-flex;align-items:center;gap:.3em;font-size:.8rem;font-weight:650;white-space:nowrap;color:#305235;background:#e1efd5;border:1px solid #b8cea9;border-radius:999px;padding:.15em .48em}
 #playtest-update i{height:.5em;width:.5em;border-radius:50%;background:currentColor;animation:playtest-update-dot 1.65s ease-in-out infinite}
 @keyframes playtest-update-dot{50%{opacity:.22}}
 @media(prefers-reduced-motion:reduce){#playtest-update i{animation:none}}
 </style><meta name="viewport" content="width=device-width,initial-scale=1"><title>岭间 · 平地自由建造</title><link rel="icon" href="data:,"><script>if(location.search)history.replaceState(null,"",location.pathname+location.hash)</script><link rel="stylesheet" href="style.css?v=parcel-gates-2"></head>
 <body>
-<header><div class="brand"><span class="logo" aria-hidden="true">川</span><strong>岭间</strong><span class="divider"></span><span class="subtitle">道路与桥梁沙盘</span></div>
-<div class="sim"><span id="candidate-tools" hidden><button id="candidate-settings" type="button">候选存档</button> <small id="candidate-status"></small></span><button id="cancelRampWork" type="button" hidden title="撤回本次等待中的匝道改造，恢复入口通行">匝道清空中 · 取消</button><button id="keepMap" type="button">保存地图</button><button id="feedback-open" type="button">反馈</button><span id="playtest-update" role="status" title="请先保存地图，再刷新此页载入新版本" hidden><i aria-hidden="true"></i>可更新</span><span id="running"><i></i>车流运行中</span><button id="pause" title="暂停或继续模拟（空格）">暂停</button><button id="speed" title="切换模拟速度">1×</button></div></header>
+<header><div class="brand"><span class="logo" aria-hidden="true">川</span><strong>岭间</strong><span class="divider"></span><span class="subtitle">道路与桥梁沙盘</span><span class="playtest-version"><span id="playtest-release">试玩版</span><span id="playtest-update" role="status" title="请先保存地图，再刷新此页载入新版本" hidden><i aria-hidden="true"></i>可更新</span></span></div>
+<div class="sim"><span id="candidate-tools" hidden><button id="candidate-settings" type="button">候选存档</button> <small id="candidate-status"></small></span><button id="cancelRampWork" type="button" hidden title="撤回本次等待中的匝道改造，恢复入口通行">匝道清空中 · 取消</button><button id="keepMap" type="button">保存地图</button><button id="feedback-open" type="button">反馈</button><span id="running"><i></i>车流运行中</span><button id="pause" title="暂停或继续模拟（空格）">暂停</button><button id="speed" title="切换模拟速度">1×</button></div></header>
 <main><aside>
 <div class="mapname"><span class="mapicon" aria-hidden="true">⌁</span><div><small>当前地图</small><h1>平原</h1></div></div>
 <section id="mapExpansion" hidden><h2>跨区架路试验</h2><output id="mapExtent"></output><button id="expandEast" type="button">向东展开一块</button></section>
@@ -496,8 +496,9 @@ $('keepMap').onclick=async()=>{
 };
 </script><script>
 (()=>{
-  if(!['https:','http:'].includes(location.protocol))return;
   const here=Number(document.querySelector('meta[name="lingjian-release"]').content);
+  document.getElementById('playtest-release').textContent='试玩版 '+here;
+  if(!['https:','http:'].includes(location.protocol))return;
   const badge=document.getElementById('playtest-update');
   const manifest=new URL('version.json',location.href);
   const entry=new URL(location.pathname,location.origin);
@@ -532,11 +533,14 @@ $('keepMap').onclick=async()=>{
       const next=(await response.json())?.release;
       if(!Number.isSafeInteger(next)||next<=here)return;
       if(await readEntryRelease(options)!==next)return;
+      badge.title='试玩版 '+next+' 已发布。请先保存地图，再刷新此页。';
       badge.hidden=false;clearInterval(poll);
     }catch{}finally{clearTimeout(timeout);busy=false;}
   }
   const poll=setInterval(check,60000);
   document.addEventListener('visibilitychange',check);
+  window.addEventListener('pageshow',check);
+  window.addEventListener('online',check);
   check();
 })();
 </script><dialog id="playtest-feedback" aria-labelledby="feedback-heading">

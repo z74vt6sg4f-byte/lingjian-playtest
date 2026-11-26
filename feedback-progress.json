@@ -1,5 +1,26 @@
 [
-  {"title":"部分道路建成后需刷新才显示","state":"received"},
-  {"title":"低视角普通路弯角及标线显示异常","state":"received"},
-  {"title":"试玩窗口增加常驻版本号和新版提示","state":"released"}
+  {
+    "title": "部分道路建成后需刷新才显示",
+    "state": "checking"
+  },
+  {
+    "title": "低视角普通路弯角及标线显示异常",
+    "state": "checking"
+  },
+  {
+    "title": "试玩窗口增加常驻版本号和新版提示",
+    "state": "released"
+  },
+  {
+    "title": "锁定高架层后建好的地面路不显示：已修复这条复现路径",
+    "state": "released"
+  },
+  {
+    "title": "高架低视角的车道虚线和坡面箭头：已修复这两类标线",
+    "state": "released"
+  },
+  {
+    "title": "无法读取的旧地图不会被默认地图覆盖",
+    "state": "released"
+  }
 ]

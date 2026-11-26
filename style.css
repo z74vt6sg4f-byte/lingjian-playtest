@@ -1096,17 +1096,19 @@ select {
 .zone-review {
   position:absolute; bottom:64px; left:50%; transform:translateX(-50%);
   z-index:4; width:max-content; max-width:calc(100% - 24px); box-sizing:border-box;
-  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  display:grid; grid-template-columns:minmax(0,1fr) auto; grid-template-rows:minmax(0,1fr);
+  align-items:center; gap:14px; max-height:min(50%,calc(100% - 76px));
   padding:10px 12px; color:#233e32; background:#faf7ed; border:1px solid #9aab97;
   border-radius:10px; box-shadow:0 4px 18px #24392d2d;
 }
 .zone-review[hidden] {display:none}
+.zone-review > div:first-child {display:grid;grid-template-rows:auto minmax(0,1fr);min-width:0;min-height:0;align-self:stretch}
 .zone-review strong {display:block; font-size:14px}
-.zone-review output {display:block; white-space:pre-line; font-size:12px; color:#475d50; line-height:1.45}
+.zone-review output {display:block; white-space:pre-line; font-size:12px; color:#475d50; line-height:1.45; overflow:auto; overflow-wrap:anywhere; overscroll-behavior:contain}
 .zone-review-actions {display:flex; align-items:center; gap:5px; flex:none}
 .zone-review-actions button {min-height:34px; padding:4px 8px; margin:0; white-space:nowrap}
 @media (max-width:700px) {
-  .zone-review {bottom:102px; align-items:flex-start; flex-direction:column; gap:6px}
+  .zone-review {bottom:102px; max-height:min(55%,calc(100% - 114px)); grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;gap:6px}
 }
 
 #mapLotGate {
